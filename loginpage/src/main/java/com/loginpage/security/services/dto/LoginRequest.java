@@ -1,4 +1,4 @@
-package com.loginpage.security;
+package com.loginpage.security.services.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LoginRequest {
-    private String username;
+    private String email;
     private String password;
 }

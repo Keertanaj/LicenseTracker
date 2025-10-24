@@ -1,14 +1,14 @@
 package com.loginpage.repositories;
 
-import com.loginpage.entities.Users;
+import com.loginpage.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<Users, Long> {
-    public Optional<Users> findByUsername(String username);
+public interface UserRepository extends JpaRepository<User, Long> {
+    public Optional<User> findByEmail(String username);
 
     public Boolean existsByUsername(String username);
 
