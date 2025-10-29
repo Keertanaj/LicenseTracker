@@ -1,5 +1,6 @@
 package org.licensetracker.service;
 
+import org.licensetracker.dto.LicenseAlertDTO;
 import org.licensetracker.dto.LicenseRequestDTO;
 import org.licensetracker.dto.LicenseResponseDTO;
 import org.licensetracker.entity.License;
@@ -10,6 +11,7 @@ import org.licensetracker.utility.LicenseUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,5 +71,14 @@ public class LicenseServiceImpl implements LicenseService {
         }
 
         return licenses.stream().map(LicenseUtility::toDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LicenseAlertDTO> getExpiringLicenses(int days) {
+        LocalDate thresholdDate = LocalDate.now().plusDays(days);
+        List<License> expiringLicenses = licenseRepo.findExpiringLicenses(days);
+        return expiringLicenses.stream()
+                .map(LicenseUtility::toAlertDto)
+                .collect(Collectors.toList());
     }
 }

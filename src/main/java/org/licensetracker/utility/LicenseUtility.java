@@ -1,6 +1,7 @@
 package org.licensetracker.utility;
 
 
+import org.licensetracker.dto.LicenseAlertDTO;
 import org.licensetracker.dto.LicenseRequestDTO;
 import org.licensetracker.dto.LicenseResponseDTO;
 import org.licensetracker.entity.License;
@@ -32,6 +33,15 @@ public class LicenseUtility {
                 .notes(l.getNotes())
                 .createdAt(l.getCreatedAt())
                 .updatedAt(l.getUpdatedAt())
+                .build();
+    }
+
+    public static LicenseAlertDTO toAlertDto(License l) {
+        return LicenseAlertDTO.builder()
+                .licenseKey(l.getLicenseKey())
+                .softwareName(l.getSoftwareName())
+                .vendor(l.getVendor())
+                .validTo(l.getValidTo())
                 .build();
     }
 

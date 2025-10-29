@@ -57,54 +57,50 @@ const AssignLicenseModal = ({ deviceId, onClose }) => {
         }
     }, [selectedLicenseKey, licenses]);
 
-    const handleAssign = async (e) => {
-        e.preventDefault();
-        setError('');
-        setMessage('');
+    // ... (omitting imports and unchanged state/functions)
 
-        if (!selectedLicenseKey) {
-            setError('Please select a license to assign.');
-            return;
+const handleAssign = async (e) => {
+    e.preventDefault();
+    setError('');
+    setMessage('');
+
+    if (!selectedLicenseKey) {
+        setError('Please select a license to assign.');
+        return;
+    }
+
+    try {
+        const assignmentsRes = await assignmentService.getAssignmentsByDeviceId(deviceId);
+        const activeAssignments = assignmentsRes.data || [];
+        const isDuplicate = activeAssignments.some(
+            (assignment) => assignment.licenseId === selectedLicenseKey
+        );
+
+        if (isDuplicate) {
+            setError('⚠️Duplicate Assignment: This exact license is already assigned to this device.');
+            return; 
         }
- 
         if (usageInfo.max !== null && usageInfo.current >= usageInfo.max) {
-             setError(`Assignment failed: Max Usage (${usageInfo.max}) Exceeded.`);
+             setError(`Assignment failed: Max Usage (${usageInfo.max}) Exceeded. Current: ${usageInfo.current}.`);
              return;
         }
-
-        try {
-            /*
-            const today = new Date();
-const year = today.getFullYear();
-const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed, so add 1
-const day = String(today.getDate()).padStart(2, '0');
-const formattedDate = `${year}-${month}-${day}`;
-console.log(formattedDate);
-*/
-            let data = {
-            assignmentId: "123",
+        let data = {
             deviceId: deviceId,
             licenseId: selectedLicenseKey,
-            assignmentDate: "2025-08-10",
-            }
-            
-            console.log(data);
-            await assignmentService.assignLicense(data);
+        };
+        
+        await assignmentService.assignLicense(data);
 
-            setMessage('License Assignment Successful! 🎉');
-            setIsAssigned(true);
-            
-        } catch (err) {
-            console.log(err)
-            const msg = err.response?.data?.message || 'Failed to assign license (Unknown Error).';
-            setError(msg);
-        }
-    };
+        setMessage('License Assignment Successful!');
+        setIsAssigned(true); 
+        
+    } catch (err) {
+        console.log(err);
+        const msg = err.response?.data?.message || 'Failed to assign license (API Error).';
+        setError(msg);
+    }
+};
 
-    // The Unassign logic and related state/calls are now completely irrelevant 
-    // since the table showing assignments is removed. You can remove the function 
-    // entirely or just leave it out to simplify. The user won't be able to see 
-    // or unassign licenses from this modal anymore.
 
     const getUtilizationPercent = (current, max) => {
         if (max === null) return 'N/A (Unlimited)';

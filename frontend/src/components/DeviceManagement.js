@@ -119,21 +119,21 @@ const DeviceManagement = () => {
     
     const getStatusBadge = (status) => {
         let backgroundColor;
-        let color = 'white'; // Default white text on colored badge
+        let color = 'white'; 
         switch (status) {
             case 'ACTIVE':
-                backgroundColor = '#83B366'; // Soft Green (Primary Action Color)
+                backgroundColor = '#83B366';
                 break;
             case 'MAINTENANCE':
-                backgroundColor = '#F25016'; // Vibrant Orange (Strong Color/Caution)
+                backgroundColor = '#F25016'; 
                 break;
             case 'OBSOLETE':
             case 'DECOMMISSIONED':
-                backgroundColor = '#F3000E'; // Bold Red (Strongest Color/Danger)
+                backgroundColor = '#F3000E'; 
                 break;
             default:
-                backgroundColor = '#D7EAAC'; // Light Greenish Yellow (Neutral/Unknown)
-                color = 'black'; // Black text for contrast on very light background
+                backgroundColor = '#D7EAAC'; 
+                color = 'black'; 
         }
         return (
             <span 
@@ -190,12 +190,10 @@ const DeviceManagement = () => {
             </div>
         </Card>
     );
-    // --- END MOBILE CARD VIEW COMPONENT ---
 
     return (
         <div className="container-fluid p-2 p-sm-4" style={{ backgroundColor: '#FFFFFF', minHeight: '100vh' }}>
-            
-            {/* Header and Action Button */}
+
             <Row className="mb-4 align-items-center">
                 <Col xs={12} md={8}>
                     <h2 style={{ color: 'black', fontWeight: 'bold' }}>Device Management </h2>
