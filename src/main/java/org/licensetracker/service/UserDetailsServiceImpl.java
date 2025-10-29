@@ -1,8 +1,8 @@
 package org.licensetracker.service;
 
-import com.loginpage.entities.User;
-import com.loginpage.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.licensetracker.entity.User;
+import org.licensetracker.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

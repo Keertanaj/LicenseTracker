@@ -1,7 +1,8 @@
 package org.licensetracker.service;
 
-import com.loginpage.entities.Role;
-import com.loginpage.entities.User;
+
+import org.licensetracker.entity.Role;
+import org.licensetracker.entity.User;
 
 public interface UserService {
     User assignRole(Long userId, Role newRole);

@@ -1,5 +1,6 @@
 package org.licensetracker.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.licensetracker.dto.LicenseRequestDTO;
 import org.licensetracker.dto.LicenseResponseDTO;
 import org.licensetracker.service.LicenseService;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@SecurityRequirement(name = "Bearer Authentication")
 @RequestMapping("/licenses")
 @CrossOrigin(origins = "http://localhost:3000")
 public class LicenseController {

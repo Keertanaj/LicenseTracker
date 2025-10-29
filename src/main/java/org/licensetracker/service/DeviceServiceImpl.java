@@ -16,9 +16,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class DeviceServiceImpl implements DeviceService{
+public class DeviceServiceImpl implements DeviceService {
     @Autowired
     public DeviceRepo deviceRepo;
+
     @Override
     public DeviceResponseDTO addDevice(DeviceRequestDTO request) {
         Device device = DeviceUtility.toEntity(request);
@@ -27,7 +28,7 @@ public class DeviceServiceImpl implements DeviceService{
     }
 
     @Override
-    public List<DeviceResponseDTO> listDevices(){
+    public List<DeviceResponseDTO> listDevices() {
         return deviceRepo.findAll().stream()
                 .map(DeviceUtility::toDto)
                 .collect(Collectors.toList());
@@ -35,7 +36,7 @@ public class DeviceServiceImpl implements DeviceService{
 
     @Override
     public DeviceResponseDTO updateDevice(String deviceId, DeviceRequestDTO request) {
-        Device device= deviceRepo.findById(deviceId)
+        Device device = deviceRepo.findById(deviceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Device not found: " + deviceId));
         deviceRepo.findByIpAddress(request.getIpAddress())
                 .ifPresent(d -> {
@@ -59,6 +60,7 @@ public class DeviceServiceImpl implements DeviceService{
         deviceRepo.delete(existing);
         return "Device deleted successfully";
     }
+
     @Override
     public List<DeviceResponseDTO> searchDevices(String ipAddress, String location) {
         List<Device> devices;
@@ -78,8 +80,16 @@ public class DeviceServiceImpl implements DeviceService{
     public List<String> getAllLocations() {
         return deviceRepo.findDistinctLocations();
     }
+
     @Override
     public List<String> getAllIpAddresses() {
         return deviceRepo.findDistinctIpAddresses();
+    }
+
+    @Override
+    public Device getDeviceById(String deviceId) {
+        // This is the implementation for the frontend's deviceService.getDeviceById(deviceId)
+        return deviceRepo.findById(deviceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Device not found with ID: " + deviceId));
     }
 }

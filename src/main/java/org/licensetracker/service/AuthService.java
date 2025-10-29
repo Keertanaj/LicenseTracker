@@ -1,6 +1,5 @@
 package org.licensetracker.service;
 
-
 import org.licensetracker.entity.User;
 
 public interface AuthService {

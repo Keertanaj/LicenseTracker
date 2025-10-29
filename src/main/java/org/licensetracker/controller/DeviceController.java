@@ -1,7 +1,9 @@
 package org.licensetracker.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.licensetracker.dto.DeviceRequestDTO;
 import org.licensetracker.dto.DeviceResponseDTO;
+import org.licensetracker.entity.Device;
 import org.licensetracker.entity.DeviceStatus;
 import org.licensetracker.service.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/devices")
+@SecurityRequirement(name = "Bearer Authentication")
 @CrossOrigin(origins = "http://localhost:3000")
 public class DeviceController {
 
@@ -19,18 +22,21 @@ public class DeviceController {
     private DeviceService deviceService;
 
     @PostMapping
+
     public ResponseEntity<DeviceResponseDTO> addDevice(@RequestBody DeviceRequestDTO request) {
         DeviceResponseDTO response = deviceService.addDevice(request);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
+
     public ResponseEntity<List<DeviceResponseDTO>> listDevices() {
         List<DeviceResponseDTO> devices = deviceService.listDevices();
         return ResponseEntity.ok(devices);
     }
 
     @PutMapping("/{deviceId}")
+
     public ResponseEntity<DeviceResponseDTO> updateDevice(
             @PathVariable String deviceId,
             @RequestBody DeviceRequestDTO request) {
@@ -67,5 +73,10 @@ public class DeviceController {
     public ResponseEntity<List<String>> getAllIpAddresses() {
         List<String> ipaddresses = deviceService.getAllIpAddresses();
         return ResponseEntity.ok(ipaddresses);
+    }
+    @GetMapping("/{deviceId}")
+    public ResponseEntity<Device> getDeviceById(@PathVariable String deviceId) {
+        Device device = deviceService.getDeviceById(deviceId);
+        return ResponseEntity.ok().body(device);
     }
 }

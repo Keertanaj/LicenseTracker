@@ -1,9 +1,9 @@
 package org.licensetracker.service;
 
-import com.loginpage.entities.Role;
-import com.loginpage.entities.User;
-import com.loginpage.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.licensetracker.entity.Role;
+import org.licensetracker.entity.User;
+import org.licensetracker.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 @Service

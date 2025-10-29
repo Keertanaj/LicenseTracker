@@ -1,5 +1,7 @@
 package org.licensetracker.config;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.licensetracker.jwt.AuthEntryPointJwt;
 import org.licensetracker.jwt.AuthTokenFilter;
@@ -20,6 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableMethodSecurity
 @RequiredArgsConstructor
+@SecurityScheme(name = "Bearer Authentication", type = SecuritySchemeType.HTTP,bearerFormat = "JWT", scheme = "bearer")
 public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
@@ -55,15 +58,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/users/**").hasRole("ADMIN")
-                        .requestMatchers("/api/newmsg/**").hasRole("ADMIN")
-                        .requestMatchers("/api/reports/**").hasRole("IT_AUDITOR")
+                        .requestMatchers("/devices/**").hasAnyRole("ADMIN")
+                        .requestMatchers("/licenses/**").hasAnyRole("ADMIN")
+                        .requestMatchers("/assignments/**").hasAnyRole("ADMIN")
                         .anyRequest().authenticated()
                 );
 
         http.authenticationProvider(authenticationProvider());
-
-        // Add JWT filter before UsernamePasswordAuthenticationFilter
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

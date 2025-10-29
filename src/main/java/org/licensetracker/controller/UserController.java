@@ -1,5 +1,6 @@
 package org.licensetracker.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.licensetracker.dto.RoleAssignRequest;
 import org.licensetracker.entity.User;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
+@SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor
 public class UserController {
 
