@@ -4,11 +4,9 @@ import { licenseService, vendorService, softwareService } from "../services/api"
 
 const LicenseForm = ({ existingLicense, onClose }) => {
   const isEdit = !!existingLicense;
-  
-  // State for the form fields
   const [form, setForm] = useState({
     licenseKey: "",
-    vendorId: "", // This will always hold the ID
+    vendorId: "",
     softwareName: "",
     licenseType: "PER_DEVICE",
     validFrom: "",
@@ -16,81 +14,57 @@ const LicenseForm = ({ existingLicense, onClose }) => {
     maxUsage: "",
     notes: ""
   });
-
-  // State for the dropdown options
   const [vendors, setVendors] = useState([]);
   const [softwareNames, setSoftwareNames] = useState([]);
 
-  // Effect 1: Fetch static data for dropdowns only once when the component mounts
   useEffect(() => {
-    const fetchDropdownData = async () => {
-      try {
-        const vendorRes = await vendorService.getAllVendors();
-        setVendors(vendorRes.data || []);
-        
-        const softwareRes = await softwareService.getAllSoftwareNames();
-        setSoftwareNames(softwareRes.data || []);
-      } catch (err) {
-        console.error("Failed to fetch dropdown data", err);
-      }
-    };
-    fetchDropdownData();
-  }, []); // Empty dependency array ensures this runs only once
-
-  // Effect 2: Populate the form when editing an existing license
-  useEffect(() => {
-    if (isEdit && existingLicense && vendors.length > 0) {
-      // Find the full vendor object from our list based on the name from the existing license
-      const currentVendor = vendors.find(v => v.vendorName === existingLicense.vendorName);
-      setForm({
-        licenseKey: existingLicense.licenseKey,
-        vendorId: currentVendor ? currentVendor.vendorId : "", // Set the ID for the dropdown
-        softwareName: existingLicense.softwareName,
-        licenseType: existingLicense.licenseType,
-        validFrom: existingLicense.validFrom,
-        validTo: existingLicense.validTo,
-        maxUsage: existingLicense.maxUsage,
-        notes: existingLicense.notes
-      });
-    } else if (!isEdit) {
-      // Reset form for 'add new'
-      setForm({
-        licenseKey: "", vendorId: "", softwareName: "", licenseType: "PER_DEVICE",
-        validFrom: "", validTo: "", maxUsage: "", notes: ""
-      });
+    if (existingLicense) {
+        const vendorId = existingLicense.vendor ? existingLicense.vendor.vendorId : "";
+        setForm({ ...existingLicense, vendorId });
     }
-  }, [isEdit, existingLicense, vendors]); // This effect runs when the necessary data is ready
 
-  const handleChange = (e) => {
+    const fetchVendors = async () => {
+        try {
+            const res = await vendorService.getAllVendors();
+            setVendors(res.data || []);
+        } catch (err) {
+            console.error("Failed to fetch vendors", err);
+        }
+    };
+
+    const fetchSoftwareNames = async () => {
+        try {
+            const res = await softwareService.getAllSoftwareNames();
+            setSoftwareNames(res.data || []);
+        } catch (err) {
+            console.error("Failed to fetch software names", err);
+        }
+    };
+
+    fetchVendors();
+    fetchSoftwareNames();
+}, [existingLicense]);
+
+  const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // **Crucial Step**: Ensure vendorId is an integer before submission
-    const submissionData = {
-      ...form,
-      vendorId: parseInt(form.vendorId, 10)
-    };
-
-    if (isNaN(submissionData.vendorId)) {
-        alert("Please select a valid vendor.");
-        return;
-    }
+    
+    console.log("Submitting form:", form);
 
     try {
       if (isEdit) {
-        await licenseService.updateLicense(submissionData.licenseKey, submissionData);
+        await licenseService.updateLicense(form.licenseKey, form);
         alert("License updated successfully!");
       } else {
-        await licenseService.addLicense(submissionData);
+        await licenseService.addLicense(form);
         alert("License added successfully!");
       }
       onClose();
     } catch (err) {
-      console.error("Failed to save license:", err);
-      alert("Failed to save license. Please check the console for more details.");
+      console.error(err);
+      alert("Failed to save license");
     }
   };
 
@@ -101,95 +75,163 @@ const LicenseForm = ({ existingLicense, onClose }) => {
 
   return (
     <Modal show centered onHide={onClose}>
-      <Modal.Header closeButton style={{ backgroundColor: ACCENT_COLOR, color: LABEL_COLOR, borderBottom: "none" }} closeVariant="dark">
+      <Modal.Header closeButton 
+        style={{ backgroundColor: ACCENT_COLOR, color: LABEL_COLOR, borderBottom: "none" }}
+        closeVariant="dark" 
+      >
         <Modal.Title style={{ color: LABEL_COLOR, fontWeight: "bold" }}>
-          {isEdit ? "Edit License Details" : "Add New License"}
+          {isEdit ? " Edit License Details" : " Add New License"}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body style={{ backgroundColor: "#FFFFFF" }}>
         <Form onSubmit={handleSubmit}>
+   
           <Row>
             <Col xs={12} md={isEdit ? 12 : 6}>
-              {!isEdit && (
-                <Form.Group className="mb-3">
-                  <Form.Label className="fw-bold" style={{ color: LABEL_COLOR }}>License Key</Form.Label>
-                  <Form.Control name="licenseKey" value={form.licenseKey} onChange={handleChange} style={{ borderColor: ACCENT_COLOR }} required />
-                </Form.Group>
-              )}
+                {!isEdit && (
+                    <Form.Group className="mb-3">
+                        <Form.Label className="fw-bold" style={{ color: LABEL_COLOR }}>License Key</Form.Label>
+                        <Form.Control
+                            name="licenseKey"
+                            value={form.licenseKey}
+                            onChange={handleChange}
+                            style={{ borderColor: ACCENT_COLOR }}
+                            required
+                        />
+                    </Form.Group>
+                )}
             </Col>
             <Col xs={12} md={isEdit ? 6 : 6}>
               <Form.Group className="mb-3">
                 <Form.Label className="fw-bold" style={{ color: LABEL_COLOR }}>Vendor</Form.Label>
-                <Form.Select name="vendorId" value={form.vendorId} onChange={handleChange} style={{ borderColor: ACCENT_COLOR }} required>
-                  <option value="">Select a Vendor</option>
-                  {vendors.map((vendor) => (
-                    <option key={vendor.vendorId} value={vendor.vendorId}>
-                      {vendor.vendorName}
-                    </option>
-                  ))}
+                <Form.Select
+                  name="vendorId"
+                  value={form.vendorId}
+                  onChange={handleChange}
+                  style={{ borderColor: ACCENT_COLOR }}
+                  required
+                >
+                    <option value="">Select a Vendor</option>
+                    {vendors.map((vendor) => (
+                        <option key={vendor.vendorId} value={vendor.vendorId}>
+                            {vendor.vendorName}
+                        </option>
+                    ))}
                 </Form.Select>
               </Form.Group>
             </Col>
           </Row>
+
           <Row>
             <Col xs={12} md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="fw-bold" style={{ color: LABEL_COLOR }}>Software Name</Form.Label>
-                <Form.Select name="softwareName" value={form.softwareName} onChange={handleChange} style={{ borderColor: ACCENT_COLOR }} required>
-                  <option value="">Select Software</option>
-                  {softwareNames.map((name) => (
-                    <option key={name} value={name}>{name}</option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Label className="fw-bold" style={{ color: LABEL_COLOR }}>Software Name</Form.Label>
+                    <Form.Select
+                        name="softwareName"
+                        value={form.softwareName}
+                        onChange={handleChange}
+                        style={{ borderColor: ACCENT_COLOR }}
+                        required
+                    >
+                        <option value="">Select Software</option>
+                        {softwareNames.map((name) => (
+                            <option key={name} value={name}>
+                                {name}
+                            </option>
+                        ))}
+                    </Form.Select>
+                </Form.Group>
             </Col>
             <Col xs={12} md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="fw-bold" style={{ color: LABEL_COLOR }}>License Type</Form.Label>
-                <Form.Select name="licenseType" value={form.licenseType} onChange={handleChange} style={{ borderColor: ACCENT_COLOR }}>
-                  <option value="PER_DEVICE">PER_DEVICE</option>
-                  <option value="PER_USER">PER_USER</option>
-                  <option value="ENTERPRISE">ENTERPRISE</option>
-                </Form.Select>
-              </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Label className="fw-bold" style={{ color: LABEL_COLOR }}>License Type</Form.Label>
+                    <Form.Select
+                        name="licenseType"
+                        value={form.licenseType}
+                        onChange={handleChange}
+                        style={{ borderColor: ACCENT_COLOR }}
+                    >
+                        <option value="PER_DEVICE">PER_DEVICE</option>
+                        <option value="PER_USER">PER_USER</option>
+                        <option value="ENTERPRISE">ENTERPRISE</option>
+                    </Form.Select>
+                </Form.Group>
             </Col>
           </Row>
+  
           <Row>
             <Col xs={12} md={6}>
               <Form.Group className="mb-3">
                 <Form.Label className="fw-bold" style={{ color: LABEL_COLOR }}>Valid From</Form.Label>
-                <Form.Control type="date" name="validFrom" value={form.validFrom} onChange={handleChange} style={{ borderColor: ACCENT_COLOR }} required />
+                <Form.Control
+                  type="date"
+                  name="validFrom"
+                  value={form.validFrom}
+                  onChange={handleChange}
+                  style={{ borderColor: ACCENT_COLOR }}
+                  required
+                />
               </Form.Group>
             </Col>
             <Col xs={12} md={6}>
               <Form.Group className="mb-3">
                 <Form.Label className="fw-bold" style={{ color: LABEL_COLOR }}>Valid To</Form.Label>
-                <Form.Control type="date" name="validTo" value={form.validTo} onChange={handleChange} style={{ borderColor: ACCENT_COLOR }} required />
+                <Form.Control
+                  type="date"
+                  name="validTo"
+                  value={form.validTo}
+                  onChange={handleChange}
+                  style={{ borderColor: ACCENT_COLOR }}
+                  required
+                />
               </Form.Group>
             </Col>
           </Row>
+
           <Row>
             <Col xs={12} md={4}>
-              <Form.Group className="mb-3">
-                <Form.Label className="fw-bold" style={{ color: LABEL_COLOR }}>Max Usage</Form.Label>
-                <Form.Control type="number" name="maxUsage" value={form.maxUsage} onChange={handleChange} style={{ borderColor: ACCENT_COLOR }} required />
-              </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Label className="fw-bold" style={{ color: LABEL_COLOR }}>Max Usage</Form.Label>
+                    <Form.Control
+                        type="number"
+                        name="maxUsage"
+                        value={form.maxUsage}
+                        onChange={handleChange}
+                        style={{ borderColor: ACCENT_COLOR }}
+                        required
+                    />
+                </Form.Group>
             </Col>
             <Col xs={12} md={8}>
-              <Form.Group className="mb-3">
-                <Form.Label className="fw-bold" style={{ color: LABEL_COLOR }}>Notes</Form.Label>
-                <Form.Control as="textarea" name="notes" value={form.notes} onChange={handleChange} style={{ borderColor: ACCENT_COLOR }} />
-              </Form.Group>
+                <Form.Group className="mb-3">
+                    <Form.Label className="fw-bold" style={{ color: LABEL_COLOR }}>Notes</Form.Label>
+                    <Form.Control
+                        as="textarea"
+                        name="notes"
+                        value={form.notes}
+                        onChange={handleChange}
+                        style={{ borderColor: ACCENT_COLOR }}
+                    />
+                </Form.Group>
             </Col>
           </Row>
         </Form>
       </Modal.Body>
+      
       <Modal.Footer className="d-flex justify-content-between">
-        <Button variant="secondary" onClick={onClose} style={{ backgroundColor: CANCEL_BUTTON_COLOR, borderColor: CANCEL_BUTTON_COLOR, color: 'white', fontWeight: 'bold' }}>
-          Cancel
+        <Button 
+            variant="secondary" 
+            onClick={onClose}
+            style={{ backgroundColor: CANCEL_BUTTON_COLOR, borderColor: CANCEL_BUTTON_COLOR, color: 'white', fontWeight: 'bold' }}
+        >
+            Cancel
         </Button>
-        <Button variant="primary" onClick={handleSubmit} style={{ backgroundColor: PRIMARY_BUTTON_COLOR, borderColor: PRIMARY_BUTTON_COLOR, color: "white", fontWeight: "bold" }}>
-          {isEdit ? "Update License" : "Add License"}
+        <Button 
+            variant="primary" 
+            onClick={handleSubmit}
+            style={{ backgroundColor: PRIMARY_BUTTON_COLOR, borderColor: PRIMARY_BUTTON_COLOR, color: "white", fontWeight: "bold" }}
+        >
+            {isEdit ? "Update License" : "Add License"}
         </Button>
       </Modal.Footer>
     </Modal>

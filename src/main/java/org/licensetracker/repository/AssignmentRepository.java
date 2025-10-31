@@ -1,5 +1,6 @@
 package org.licensetracker.repository;
 
+import org.licensetracker.dto.ReportDTO;
 import org.licensetracker.entity.Assignment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,4 +16,13 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Integer>
     @Query("SELECT COUNT(*) FROM Assignment a WHERE a.license.licenseKey = :licenseKey")
     Long countAssignmentsByLicenseKey(@Param("licenseKey") String licenseKey);
     long count();
+
+    @Query("SELECT new org.licensetracker.dto.ReportDTO(" +
+            "a.license.licenseKey, a.device.deviceId, a.license.softwareName, " +
+            "a.license.vendor.vendorName, a.device.location, a.license.validTo) " +
+            "FROM Assignment a " +
+            "WHERE (:vendor IS NULL OR a.license.vendor.vendorName = :vendor) " +
+            "AND (:software IS NULL OR a.license.softwareName = :software) " +
+            "AND (:location IS NULL OR a.device.location = :location)")
+    List<ReportDTO> findReportData(String vendor, String software, String location);
 }

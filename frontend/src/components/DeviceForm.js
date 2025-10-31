@@ -44,12 +44,10 @@ const DeviceForm = ({ existingDevice, onClose }) => {
   return (
     <Modal show onHide={onClose} centered>
       <Modal.Header 
-        // Header uses the main blue color
         style={{ backgroundColor: PRIMARY_COLOR, color: 'white', borderBottom: 'none' }} 
         closeButton 
         closeVariant="white"
       >
-        {/* ✨ Centered Title using Flexbox utilities on the Modal.Title component (or a container if needed) */}
         <div style={{ width: '100%', textAlign: 'center' }}>
           <Modal.Title>{isEdit ? "Edit Device Details" : "Add New Device"}</Modal.Title>
         </div>
@@ -58,7 +56,6 @@ const DeviceForm = ({ existingDevice, onClose }) => {
       <Modal.Body style={{ backgroundColor: '#FFFFFF' }}>
         <Form onSubmit={handleSubmit}>
           
-          {/* Row 1: Device ID (only for Add) and Device Name */}
           <Row>
             <Col xs={12} md={isEdit ? 12 : 6}>
                 {!isEdit && (
@@ -68,7 +65,6 @@ const DeviceForm = ({ existingDevice, onClose }) => {
                             name="deviceId"
                             value={form.deviceId}
                             onChange={handleChange}
-                            // ✨ Input border color changed to PRIMARY_COLOR ✨
                             style={{ borderColor: PRIMARY_COLOR }}
                             required
                         />
@@ -82,7 +78,6 @@ const DeviceForm = ({ existingDevice, onClose }) => {
                   name="deviceName"
                   value={form.deviceName}
                   onChange={handleChange}
-                  // ✨ Input border color changed to PRIMARY_COLOR ✨
                   style={{ borderColor: PRIMARY_COLOR }}
                   required
                 />
@@ -99,7 +94,6 @@ const DeviceForm = ({ existingDevice, onClose }) => {
                   name="ipAddress"
                   value={form.ipAddress}
                   onChange={handleChange}
-                  // ✨ Input border color changed to PRIMARY_COLOR ✨
                   style={{ borderColor: PRIMARY_COLOR }}
                 />
               </Form.Group>
@@ -111,7 +105,6 @@ const DeviceForm = ({ existingDevice, onClose }) => {
                   name="deviceType"
                   value={form.deviceType}
                   onChange={handleChange}
-                  // ✨ Input border color changed to PRIMARY_COLOR ✨
                   style={{ borderColor: PRIMARY_COLOR }}
                 />
               </Form.Group>
@@ -127,7 +120,6 @@ const DeviceForm = ({ existingDevice, onClose }) => {
                   name="location"
                   value={form.location}
                   onChange={handleChange}
-                  // ✨ Input border color changed to PRIMARY_COLOR ✨
                   style={{ borderColor: PRIMARY_COLOR }}
                 />
               </Form.Group>
@@ -139,7 +131,6 @@ const DeviceForm = ({ existingDevice, onClose }) => {
                   name="model"
                   value={form.model}
                   onChange={handleChange}
-                  // ✨ Input border color changed to PRIMARY_COLOR ✨
                   style={{ borderColor: PRIMARY_COLOR }}
                 />
               </Form.Group>
@@ -153,7 +144,6 @@ const DeviceForm = ({ existingDevice, onClose }) => {
               name="status"
               value={form.status}
               onChange={handleChange}
-              // ✨ Select border color changed to PRIMARY_COLOR ✨
               style={{ borderColor: PRIMARY_COLOR }}
               required
             >
@@ -171,7 +161,6 @@ const DeviceForm = ({ existingDevice, onClose }) => {
         <Button 
           variant="secondary" 
           onClick={onClose}
-          // Using Red for Cancel/Negative action
           style={{ backgroundColor: '#F3000E', borderColor: '#F3000E', color: 'white', fontWeight: 'bold' }}
         >
           Cancel
@@ -179,7 +168,6 @@ const DeviceForm = ({ existingDevice, onClose }) => {
         <Button 
           variant="primary" 
           onClick={handleSubmit}
-          // Primary action button uses the main blue
           style={{ backgroundColor: PRIMARY_COLOR, borderColor: PRIMARY_COLOR, color: 'white', fontWeight: 'bold' }}
         >
           {isEdit ? "Update Device" : " Add Device"}

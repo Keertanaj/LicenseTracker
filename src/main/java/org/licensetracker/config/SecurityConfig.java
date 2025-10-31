@@ -66,6 +66,7 @@ public class SecurityConfig {
                         .requestMatchers("/software/**").hasAnyRole("ADMIN")
                         .requestMatchers("/dashboard/**").hasAnyRole("ADMIN")
                         .requestMatchers("/vendors/**").hasAnyRole("ADMIN")
+                        .requestMatchers("/reports/**").hasAnyRole("ADMIN")
 
                         .anyRequest().authenticated()
                 );
