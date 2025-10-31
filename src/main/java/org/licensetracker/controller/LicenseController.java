@@ -47,4 +47,14 @@ public class LicenseController {
             @RequestParam(required = false) String softwareName) {
         return ResponseEntity.ok(licenseService.searchLicenses(vendor, softwareName));
     }
+
+    @GetMapping("/vendors")
+    public ResponseEntity<List<String>> getAllVendors() {
+        return ResponseEntity.ok(licenseService.getAllVendors());
+    }
+
+    @GetMapping("/software")
+    public ResponseEntity<List<String>> getAllSoftware() {
+        return ResponseEntity.ok(licenseService.getAllSoftware());
+    }
 }

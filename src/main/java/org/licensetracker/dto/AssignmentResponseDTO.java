@@ -15,6 +15,7 @@ public class AssignmentResponseDTO {
     private Integer assignmentId;
     private String deviceId;
     private String licenseId;
+    private String softwareName;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate assignmentDate;
 }

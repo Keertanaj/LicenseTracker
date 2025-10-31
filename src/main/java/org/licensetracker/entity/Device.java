@@ -9,7 +9,8 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "device")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Device {

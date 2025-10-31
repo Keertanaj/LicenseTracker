@@ -5,13 +5,18 @@ import org.licensetracker.dto.LicenseAlertDTO;
 import org.licensetracker.dto.LicenseRequestDTO;
 import org.licensetracker.dto.LicenseResponseDTO;
 import org.licensetracker.entity.License;
+import org.licensetracker.entity.Vendor;
+import org.licensetracker.repository.VendorRepository;
 
 public class LicenseUtility {
 
-    public static License toEntity(LicenseRequestDTO dto) {
+    public static License toEntity(LicenseRequestDTO dto, VendorRepository vendorRepository) {
+        Vendor vendor = vendorRepository.findById(dto.getVendorId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid vendor ID: " + dto.getVendorId()));
+
         return License.builder()
                 .licenseKey(dto.getLicenseKey())
-                .vendor(dto.getVendor())
+                .vendor(vendor)
                 .softwareName(dto.getSoftwareName())
                 .licenseType(dto.getLicenseType())
                 .validFrom(dto.getValidFrom())
@@ -24,7 +29,7 @@ public class LicenseUtility {
     public static LicenseResponseDTO toDto(License l) {
         return LicenseResponseDTO.builder()
                 .licenseKey(l.getLicenseKey())
-                .vendor(l.getVendor())
+                .vendorName(l.getVendor() != null ? l.getVendor().getVendorName() : null)
                 .softwareName(l.getSoftwareName())
                 .licenseType(l.getLicenseType() != null ? l.getLicenseType().name() : null)
                 .validFrom(l.getValidFrom())
@@ -40,13 +45,17 @@ public class LicenseUtility {
         return LicenseAlertDTO.builder()
                 .licenseKey(l.getLicenseKey())
                 .softwareName(l.getSoftwareName())
-                .vendor(l.getVendor())
+                .vendor(l.getVendor().getVendorName())
                 .validTo(l.getValidTo())
                 .build();
     }
 
-    public static void updateEntityFromDto(License l, LicenseRequestDTO dto) {
-        if (dto.getVendor() != null) l.setVendor(dto.getVendor());
+    public static void updateEntityFromDto(License l, LicenseRequestDTO dto, VendorRepository vendorRepository) {
+        if (dto.getVendorId() != null) {
+            Vendor vendor = vendorRepository.findById(dto.getVendorId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid vendor ID: " + dto.getVendorId()));
+            l.setVendor(vendor);
+        }
         if (dto.getSoftwareName() != null) l.setSoftwareName(dto.getSoftwareName());
         if (dto.getLicenseType() != null) l.setLicenseType(dto.getLicenseType());
         if (dto.getValidFrom() != null) l.setValidFrom(dto.getValidFrom());

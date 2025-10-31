@@ -32,6 +32,10 @@ public class AssignmentUtility {
         dto.setAssignmentId(a.getAssignmentId());
         dto.setDeviceId(a.getDevice() != null ? a.getDevice().getDeviceId() : null);
         dto.setLicenseId(a.getLicense() != null ? a.getLicense().getLicenseKey() : null);
+        // Populate the new softwareName field
+        if (a.getLicense() != null) {
+            dto.setSoftwareName(a.getLicense().getSoftwareName());
+        }
         dto.setAssignmentDate(a.getAssignedOn());
         return dto;
     }

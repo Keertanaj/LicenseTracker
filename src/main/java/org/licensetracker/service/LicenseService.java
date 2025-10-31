@@ -13,4 +13,6 @@ public interface LicenseService {
     String deleteLicense(String licenseKey);
     List<LicenseResponseDTO> searchLicenses(String vendor, String softwareName);
     List<LicenseAlertDTO> getExpiringLicenses(int days);
+    List<String> getAllVendors();
+    List<String> getAllSoftware();
 }

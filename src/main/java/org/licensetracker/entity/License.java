@@ -1,10 +1,7 @@
 package org.licensetracker.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -14,14 +11,17 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "license")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class License {
     @Id
     private String licenseKey;
 
-    private String vendor;
+    @ManyToOne
+    @JoinColumn(name = "vendor_id", nullable = false)
+    private Vendor vendor;
 
     private String softwareName;
 

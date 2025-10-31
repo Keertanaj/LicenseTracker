@@ -15,6 +15,7 @@ public interface DeviceRepo extends JpaRepository<Device, String> {
     boolean existsByIpAddress(String ipAddress);
     List<Device> findByIpAddressContainingIgnoreCase(String ipAddress);
     List<Device> findByLocationIgnoreCase(String location);
+    List<Device> findByIpAddressContainingIgnoreCaseAndLocationIgnoreCase(String ipAddress, String location);
     @Query("SELECT DISTINCT d.location FROM Device d")
     List<String> findDistinctLocations();
     @Query("SELECT DISTINCT d.ipAddress FROM Device d")

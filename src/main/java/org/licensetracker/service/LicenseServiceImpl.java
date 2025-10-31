@@ -4,9 +4,11 @@ import org.licensetracker.dto.LicenseAlertDTO;
 import org.licensetracker.dto.LicenseRequestDTO;
 import org.licensetracker.dto.LicenseResponseDTO;
 import org.licensetracker.entity.License;
+import org.licensetracker.entity.Vendor;
 import org.licensetracker.exception.DuplicateResourceException;
 import org.licensetracker.exception.ResourceNotFoundException;
 import org.licensetracker.repository.LicenseRepository;
+import org.licensetracker.repository.VendorRepository;
 import org.licensetracker.utility.LicenseUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,12 +23,15 @@ public class LicenseServiceImpl implements LicenseService {
     @Autowired
     private LicenseRepository licenseRepo;
 
+    @Autowired
+    private VendorRepository vendorRepository;
+
     @Override
     public LicenseResponseDTO addLicense(LicenseRequestDTO request) {
         if (licenseRepo.existsById(request.getLicenseKey())) {
             throw new DuplicateResourceException("License already exists: " + request.getLicenseKey());
         }
-        License license = LicenseUtility.toEntity(request);
+        License license = LicenseUtility.toEntity(request, vendorRepository);
         License saved = licenseRepo.save(license);
         return LicenseUtility.toDto(saved);
     }
@@ -44,7 +49,7 @@ public class LicenseServiceImpl implements LicenseService {
         License license = licenseRepo.findById(licenseKey)
                 .orElseThrow(() -> new ResourceNotFoundException("License not found: " + licenseKey));
 
-        LicenseUtility.updateEntityFromDto(license, request);
+        LicenseUtility.updateEntityFromDto(license, request, vendorRepository);
         License saved = licenseRepo.save(license);
         return LicenseUtility.toDto(saved);
     }
@@ -59,11 +64,14 @@ public class LicenseServiceImpl implements LicenseService {
     }
 
     @Override
-    public List<LicenseResponseDTO> searchLicenses(String vendor, String softwareName) {
+    public List<LicenseResponseDTO> searchLicenses(String vendorName, String softwareName) {
         List<License> licenses;
 
-        if (vendor != null && !vendor.isEmpty()) {
-            licenses = licenseRepo.findByVendorIgnoreCase(vendor);
+        if (vendorName != null && !vendorName.isEmpty()) {
+            // Find the vendor by name first
+            Vendor vendor = vendorRepository.findByVendorNameIgnoreCase(vendorName)
+                    .orElseThrow(() -> new ResourceNotFoundException("Vendor not found: " + vendorName));
+            licenses = licenseRepo.findByVendor(vendor);
         } else if (softwareName != null && !softwareName.isEmpty()) {
             licenses = licenseRepo.findBySoftwareNameContainingIgnoreCase(softwareName);
         } else {
@@ -80,5 +88,17 @@ public class LicenseServiceImpl implements LicenseService {
         return expiringLicenses.stream()
                 .map(LicenseUtility::toAlertDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getAllVendors() {
+        return vendorRepository.findAll().stream()
+                .map(Vendor::getVendorName)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getAllSoftware() {
+        return licenseRepo.findDistinctSoftware();
     }
 }

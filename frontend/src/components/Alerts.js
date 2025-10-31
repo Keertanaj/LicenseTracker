@@ -1,3 +1,5 @@
+// Alerts.js
+
 import React, { useState, useEffect, useCallback } from "react";
 import {
     Row,
@@ -12,6 +14,7 @@ import {
 } from "react-bootstrap";
 
 import { alertService } from "../services/api"; 
+import RenewalModal from "./RenewalModal"; 
 
 const getExpirationStatus = (validTo) => {
     const today = new Date();
@@ -31,17 +34,17 @@ const Alerts = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [lookAheadDays, setLookAheadDays] = useState(30); 
+    
+    const [showRenewalModal, setShowRenewalModal] = useState(false);
+    const [selectedLicense, setSelectedLicense] = useState(null);
 
     const loadAlerts = useCallback(async (days) => {
         setLoading(true);
         setError(null);
         try {
-            // **Calls the real API endpoint via alertService**
             const res = await alertService.getExpiringAlerts(days);
-            // Assumes 'res' is the standard response object { data: [...] }
             setAlerts(res.data || []); 
         } catch (err) {
-            // Error handling for failed network request or API error
             setError("Failed to fetch license alerts. Please ensure the backend is running and the /alerts endpoint is available.");
         } finally {
             setLoading(false);
@@ -56,8 +59,19 @@ const Alerts = () => {
         const days = parseInt(e.target.value);
         if (!isNaN(days) && days > 0) {
             setLookAheadDays(days);
-            // The useEffect hook will be triggered by the lookAheadDays state change,
-            // which in turn calls loadAlerts.
+        }
+    };
+    
+    const handleRenewClick = (license) => {
+        setSelectedLicense(license);
+        setShowRenewalModal(true);
+    };
+
+    const handleModalClose = (wasRenewed = false) => {
+        setShowRenewalModal(false);
+        setSelectedLicense(null);
+        if (wasRenewed) {
+            loadAlerts(lookAheadDays);
         }
     };
 
@@ -74,7 +88,6 @@ const Alerts = () => {
                 </Col>
             </Row>
 
-            {/* Filter Card for Days Look-Ahead */}
             <Card className="mb-4 shadow-sm" style={{ backgroundColor: "#F25016", border: "none" }}>
                 <Card.Body>
                     <Row className="align-items-center">
@@ -106,7 +119,6 @@ const Alerts = () => {
                 </Card.Body>
             </Card>
 
-            {/* Alerts Table */}
             <Card className="shadow-sm">
                 <Card.Body>
                     {loading ? (
@@ -118,7 +130,7 @@ const Alerts = () => {
                         <Alert variant="danger" className="text-center">{error}</Alert>
                     ) : alerts.length === 0 ? (
                         <Alert variant="success" className="text-center">
-                            🎉 **All Clear!** No expiring or expired licenses found within the next **{lookAheadDays}** days.
+                            All Clear! No expiring or expired licenses found within the next {lookAheadDays} days.
                         </Alert>
                     ) : (
                         <div className="table-responsive">
@@ -158,7 +170,7 @@ const Alerts = () => {
                                                             size="sm" 
                                                             className="ms-2" 
                                                             style={{ border: `1px solid ${status.background}`, color: status.background, fontWeight: 'bold' }}
-                                                            onClick={() => alert(`Simulating: Renew/Edit Key ${alert.licenseKey}`)} 
+                                                            onClick={() => handleRenewClick(alert)} 
                                                         >
                                                             Renew
                                                         </Button>
@@ -173,6 +185,13 @@ const Alerts = () => {
                     )}
                 </Card.Body>
             </Card>
+
+            {showRenewalModal && selectedLicense && (
+                <RenewalModal 
+                    license={selectedLicense} 
+                    onClose={handleModalClose} 
+                />
+            )}
         </div>
     );
 };

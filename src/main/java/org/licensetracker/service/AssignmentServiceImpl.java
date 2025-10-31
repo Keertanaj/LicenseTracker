@@ -4,10 +4,12 @@ import org.licensetracker.dto.AssignmentRequestDTO;
 import org.licensetracker.dto.AssignmentResponseDTO;
 import org.licensetracker.entity.Assignment;
 import org.licensetracker.entity.License;
+import org.licensetracker.entity.Software;
 import org.licensetracker.exception.ResourceNotFoundException;
 import org.licensetracker.repository.AssignmentRepository;
 import org.licensetracker.repository.DeviceRepo;
 import org.licensetracker.repository.LicenseRepository;
+import org.licensetracker.repository.SoftwareRepository;
 import org.licensetracker.utility.AssignmentUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,12 @@ public class AssignmentServiceImpl implements AssignmentService {
     private DeviceRepo deviceRepository;
     @Autowired
     private LicenseRepository licenseRepository;
+
+    @Autowired
+    private SoftwareRepository softwareRepository; // Injected to find software
+
+    @Autowired
+    private InstallationService installationService; // Injected to create installation
 
     @Transactional
     public AssignmentResponseDTO assignLicense(AssignmentRequestDTO assignmentRequestDto) {
@@ -53,6 +61,20 @@ public class AssignmentServiceImpl implements AssignmentService {
             );
         }
         Assignment savedAssignment = assignmentRepository.save(assignment);
+
+        // --- New, Corrected Logic to create Installation entry ---
+        String softwareName = savedAssignment.getLicense().getSoftwareName();
+        
+        // Find the software in the master software table. Throw an error if it doesn't exist.
+        Software software = softwareRepository.findBySoftwareName(softwareName)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Cannot create installation. Software named '" + softwareName + "' does not exist in the master software list."
+                ));
+
+        // If software is found, create the installation record.
+        installationService.createInstallation(savedAssignment.getDevice(), software);
+        // --- End of New Logic ---
+
         return AssignmentUtility.toDto(savedAssignment);
     }
 

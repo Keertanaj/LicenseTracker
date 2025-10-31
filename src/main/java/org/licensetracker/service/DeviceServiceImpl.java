@@ -65,7 +65,9 @@ public class DeviceServiceImpl implements DeviceService {
     public List<DeviceResponseDTO> searchDevices(String ipAddress, String location) {
         List<Device> devices;
 
-        if (ipAddress != null && !ipAddress.isEmpty()) {
+        if (ipAddress != null && !ipAddress.isEmpty() && location != null && !location.isEmpty()) {
+            devices = deviceRepo.findByIpAddressContainingIgnoreCaseAndLocationIgnoreCase(ipAddress, location);
+        } else if (ipAddress != null && !ipAddress.isEmpty()) {
             devices = deviceRepo.findByIpAddressContainingIgnoreCase(ipAddress);
         } else if (location != null && !location.isEmpty()) {
             devices = deviceRepo.findByLocationIgnoreCase(location);

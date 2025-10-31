@@ -1,20 +1,18 @@
 package org.licensetracker.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class LicenseResponseDTO {
     private String licenseKey;
-    private String vendor;
+    private String vendorName;
     private String softwareName;
     private String licenseType;
     private LocalDate validFrom;
