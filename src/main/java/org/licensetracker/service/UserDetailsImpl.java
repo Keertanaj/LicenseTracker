@@ -30,11 +30,16 @@ public class UserDetailsImpl implements UserDetails {
         );
 
         return new UserDetailsImpl(
-                user.getId(),
+                user.getUserId(),
                 user.getEmail(),
-                user.getPassword(),
+                user.getPasswordHash(),
                 authorities
         );
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
     }
 
     @Override

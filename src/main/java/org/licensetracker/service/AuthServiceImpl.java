@@ -25,13 +25,11 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Email already taken!");
         }
 
-        User user = User.builder()
-                .username(username)
-                .email(email)
-                .password(passwordEncoder.encode(password))
-                .mobile(mobile)
-                .role(Role.ROLE_USER)
-                .build();
+        User user = new User();
+        user.setName(username); // Correctly set the name
+        user.setEmail(email);
+        user.setPasswordHash(passwordEncoder.encode(password));
+        user.setRole(Role.ROLE_USER); // Default role
 
         return userRepository.save(user);
     }
@@ -54,4 +52,3 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }
-

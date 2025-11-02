@@ -1,9 +1,9 @@
 package org.licensetracker.entity;
+
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name="user_details")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -12,11 +12,12 @@ import lombok.*;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String username;
+    private Long userId;
+
     private String email;
-    private String password;
-    private String mobile;
+    private String name;
+    private String passwordHash;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 }

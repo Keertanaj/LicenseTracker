@@ -1,23 +1,45 @@
 package org.licensetracker.service;
 
-import lombok.RequiredArgsConstructor;
+import org.licensetracker.dto.UserResponseDTO;
 import org.licensetracker.entity.Role;
 import org.licensetracker.entity.User;
+import org.licensetracker.exception.ResourceNotFoundException;
 import org.licensetracker.repository.UserRepository;
+import org.licensetracker.utility.UserUtility;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
-    public User assignRole(Long userId, Role newRole) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public List<UserResponseDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(UserUtility::toDto)
+                .collect(Collectors.toList());
+    }
 
-        user.setRole(newRole);
-        return userRepository.save(user);
+    @Override
+    public UserResponseDTO assignRole(Long userId, Role role) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+        
+        user.setRole(role);
+        User updatedUser = userRepository.save(user);
+        
+        return UserUtility.toDto(updatedUser);
+    }
+
+    @Override
+    public UserResponseDTO findByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        return UserUtility.toDto(user);
     }
 }

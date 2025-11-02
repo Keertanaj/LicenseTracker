@@ -1,9 +1,12 @@
 package org.licensetracker.service;
 
-
+import org.licensetracker.dto.UserResponseDTO;
 import org.licensetracker.entity.Role;
-import org.licensetracker.entity.User;
+
+import java.util.List;
 
 public interface UserService {
-    User assignRole(Long userId, Role newRole);
+    List<UserResponseDTO> getAllUsers();
+    UserResponseDTO assignRole(Long userId, Role role);
+    UserResponseDTO findByEmail(String email);
 }
