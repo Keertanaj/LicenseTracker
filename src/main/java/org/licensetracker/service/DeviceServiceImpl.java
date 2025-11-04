@@ -1,5 +1,8 @@
 package org.licensetracker.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.licensetracker.dto.AuditLogRequestDTO;
 import org.licensetracker.dto.DeviceRequestDTO;
 import org.licensetracker.dto.DeviceResponseDTO;
 import org.licensetracker.entity.Device;
@@ -13,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,23 +24,41 @@ public class DeviceServiceImpl implements DeviceService {
     @Autowired
     public DeviceRepo deviceRepo;
 
+    @Autowired
+    private AuditLogService auditLogService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+    private Map<String, Object> getUserInfoForAudit() {
+        return auditLogService.getCurrentUserInfo();
+    }
+
     @Override
     public DeviceResponseDTO addDevice(DeviceRequestDTO request) {
         Device device = DeviceUtility.toEntity(request);
         Device saved = deviceRepo.save(device);
+
+        try {
+            Map<String, Object> userInfo = getUserInfoForAudit();
+            Long currentUserId = (Long) userInfo.get("userId");
+            AuditLogRequestDTO logRequest = AuditLogRequestDTO.builder()
+                    .userId(currentUserId)
+                    .entityType("DEVICE")
+                    .entityId("1")
+                    .action("CREATE")
+                    .details("Created a device")
+                    .build();
+            auditLogService.createLog(logRequest);
+
+        } catch (Exception e) { // Catch SecurityException, JsonProcessingException, and errors from AuditLogService
+            System.err.println("Audit logging failed for device creation: " + e.getMessage());
+        }
         return DeviceUtility.toDto(saved);
     }
 
     @Override
-    public List<DeviceResponseDTO> listDevices() {
-        return deviceRepo.findAll().stream()
-                .map(DeviceUtility::toDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public DeviceResponseDTO updateDevice(String deviceId, DeviceRequestDTO request) {
-        Device device = deviceRepo.findById(deviceId)
+        Device oldDevice = deviceRepo.findById(deviceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Device not found: " + deviceId));
         deviceRepo.findByIpAddress(request.getIpAddress())
                 .ifPresent(d -> {
@@ -45,8 +67,25 @@ public class DeviceServiceImpl implements DeviceService {
                                 "IP address already in use: " + request.getIpAddress());
                     }
                 });
-        DeviceUtility.updateEntityFromDto(device, request);
-        Device saved = deviceRepo.save(device);
+        DeviceUtility.updateEntityFromDto(oldDevice, request);
+        Device saved = deviceRepo.save(oldDevice);
+
+        try {
+            Map<String, Object> userInfo = getUserInfoForAudit();
+            Long currentUserId = (Long) userInfo.get("userId");
+
+            AuditLogRequestDTO logRequest = AuditLogRequestDTO.builder()
+                    .userId(currentUserId)
+                    .entityType("DEVICE")
+                    .entityId("1")
+                    .action("UPDATE")
+                    .details("Updated a device")
+                    .build();
+            auditLogService.createLog(logRequest);
+
+        } catch (Exception e) {
+            System.err.println("Audit logging failed for device update: " + e.getMessage());
+        }
         return DeviceUtility.toDto(saved);
     }
 
@@ -58,13 +97,36 @@ public class DeviceServiceImpl implements DeviceService {
             throw new BadRequestException("Device must be DECOMMISSIONED before deletion");
         }
         deviceRepo.delete(existing);
+
+        try {
+            Map<String, Object> userInfo = getUserInfoForAudit();
+            Long currentUserId = (Long) userInfo.get("userId");
+
+            AuditLogRequestDTO logRequest = AuditLogRequestDTO.builder()
+                    .userId(currentUserId)
+                    .entityType("DEVICE")
+                    .entityId("1")
+                    .action("DELETE")
+                    .details("Deleted a device")
+                    .build();
+            auditLogService.createLog(logRequest);
+
+        } catch (Exception e) {
+            System.err.println("Audit logging failed for device deletion: " + e.getMessage());
+        }
         return "Device deleted successfully";
+    }
+
+    @Override
+    public List<DeviceResponseDTO> listDevices() {
+        return deviceRepo.findAll().stream()
+                .map(DeviceUtility::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<DeviceResponseDTO> searchDevices(String ipAddress, String location) {
         List<Device> devices;
-
         if (ipAddress != null && !ipAddress.isEmpty() && location != null && !location.isEmpty()) {
             devices = deviceRepo.findByIpAddressContainingIgnoreCaseAndLocationIgnoreCase(ipAddress, location);
         } else if (ipAddress != null && !ipAddress.isEmpty()) {
@@ -74,7 +136,6 @@ public class DeviceServiceImpl implements DeviceService {
         } else {
             devices = deviceRepo.findAll();
         }
-
         return devices.stream().map(DeviceUtility::toDto).collect(Collectors.toList());
     }
 
@@ -90,7 +151,6 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public Device getDeviceById(String deviceId) {
-        // This is the implementation for the frontend's deviceService.getDeviceById(deviceId)
         return deviceRepo.findById(deviceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Device not found with ID: " + deviceId));
     }

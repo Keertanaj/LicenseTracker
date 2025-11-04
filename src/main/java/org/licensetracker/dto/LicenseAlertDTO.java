@@ -14,6 +14,7 @@ public class LicenseAlertDTO {
     private String licenseKey;
     private String softwareName;
     private String vendor;
+    private Long devicesUsed; // Added this field
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate validTo;
 }

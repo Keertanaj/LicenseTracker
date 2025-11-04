@@ -54,7 +54,11 @@ export const vendorService = {
 };
 
 export const softwareService = {
-    getAllSoftwareNames: () => api.get("/software/names")
+    
+    getAllSoftware: () => api.get("/software"),
+    addSoftware: (data) => api.post("/software", data),
+    updateSoftware: (id, data) => api.put(`/software/${id}`, data),
+    deleteSoftware: (id) => api.delete(`/software/${id}`)
 };
 
 export const assignmentService = {
@@ -84,17 +88,16 @@ export const reportService = {
 export const userService = {
     getUsers: () => api.get('/users'),
     createUser: (data) => api.post('/users', data),
-    // Corrected to match backend
     assignRole: (userId, data) => api.put(`/users/${userId}/role`, data),
-    deleteUser: (userId) => api.delete(`/users/${userId}`)
+    deleteUser: (userId) => api.delete(`/users/${userId}`) 
 };
 
 export const auditLogService = {
-    getLogs: (filters) => api.get(`/auditlogs`, { params: filters })
-}
+    getLogs: (filters) => api.get(`/auditlogs`, { params: filters }) 
+} 
 
 export const roleService = {
-    getRoles: () => api.get('/roles')
+    getRoles: () => api.get('/roles') 
 }
 
 export default api;

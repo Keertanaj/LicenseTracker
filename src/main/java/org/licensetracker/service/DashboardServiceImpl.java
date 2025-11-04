@@ -2,10 +2,9 @@ package org.licensetracker.service;
 
 import org.licensetracker.dto.DashboardMetricsDTO;
 import org.licensetracker.dto.LicenseAlertDTO;
-import org.licensetracker.entity.Assignment;
-import org.licensetracker.entity.Device;
 import org.licensetracker.repository.AssignmentRepository;
 import org.licensetracker.repository.DeviceRepo;
+import org.licensetracker.repository.InstallationRepository;
 import org.licensetracker.repository.LicenseRepository;
 import org.licensetracker.utility.DashboardUtility;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class DashboardServiceImpl implements DashboardService {
@@ -27,6 +24,9 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Autowired
     private AssignmentRepository assignmentRepository;
+
+    @Autowired
+    private InstallationRepository installationRepository;
 
     @Autowired
     private LicenseService licenseService;
@@ -48,15 +48,10 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public long getDevicesAtRisk(int days) {
         List<LicenseAlertDTO> expiringLicenses = licenseService.getExpiringLicenses(days);
-        Set<String> expiringLicenseKeys = expiringLicenses.stream()
-                .map(LicenseAlertDTO::getLicenseKey)
-                .collect(Collectors.toSet());
-
-        Set<Device> devicesAtRisk = expiringLicenseKeys.stream()
-                .flatMap(licenseKey -> assignmentRepository.findByLicense_LicenseKey(licenseKey).stream())
-                .map(Assignment::getDevice)
-                .collect(Collectors.toSet());
-
-        return devicesAtRisk.size();
+        return expiringLicenses.stream()
+                .flatMap(license -> assignmentRepository.findByLicense_LicenseKey(license.getLicenseKey()).stream())
+                .map(assignment -> assignment.getDevice().getDeviceId())
+                .distinct()
+                .count();
     }
 }

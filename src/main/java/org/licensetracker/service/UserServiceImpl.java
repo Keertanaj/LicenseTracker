@@ -29,10 +29,10 @@ public class UserServiceImpl implements UserService {
     public UserResponseDTO assignRole(Long userId, Role role) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
-        
+
         user.setRole(role);
         User updatedUser = userRepository.save(user);
-        
+
         return UserUtility.toDto(updatedUser);
     }
 
@@ -43,3 +43,5 @@ public class UserServiceImpl implements UserService {
         return UserUtility.toDto(user);
     }
 }
+
+

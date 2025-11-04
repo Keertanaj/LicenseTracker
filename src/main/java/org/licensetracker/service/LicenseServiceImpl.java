@@ -1,5 +1,6 @@
 package org.licensetracker.service;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.licensetracker.dto.AuditLogRequestDTO; // 👈 Import Audit DTO
 import org.licensetracker.dto.LicenseAlertDTO;
 import org.licensetracker.dto.LicenseRequestDTO;
 import org.licensetracker.dto.LicenseResponseDTO;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map; // 👈 Import Map
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +28,16 @@ public class LicenseServiceImpl implements LicenseService {
     @Autowired
     private VendorRepository vendorRepository;
 
+    @Autowired
+    private AuditLogService auditLogService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private Map<String, Object> getUserInfoForAudit() {
+        return auditLogService.getCurrentUserInfo();
+    }
+
     @Override
     public LicenseResponseDTO addLicense(LicenseRequestDTO request) {
         if (licenseRepo.existsById(request.getLicenseKey())) {
@@ -33,6 +45,23 @@ public class LicenseServiceImpl implements LicenseService {
         }
         License license = LicenseUtility.toEntity(request, vendorRepository);
         License saved = licenseRepo.save(license);
+
+        try {
+            Map<String, Object> userInfo = getUserInfoForAudit();
+            Long currentUserId = (Long) userInfo.get("userId");
+            AuditLogRequestDTO logRequest = AuditLogRequestDTO.builder()
+                    .userId(currentUserId)
+                    .entityType("LICENSE")
+                    .entityId("2")
+                    .action("CREATE")
+                    .details("CREATED LICENSE")
+                    .build();
+            auditLogService.createLog(logRequest);
+
+        } catch (Exception e) {
+            System.err.println("Audit logging failed for license creation: " + e.getMessage());
+        }
+
         return LicenseUtility.toDto(saved);
     }
 
@@ -51,6 +80,24 @@ public class LicenseServiceImpl implements LicenseService {
 
         LicenseUtility.updateEntityFromDto(license, request, vendorRepository);
         License saved = licenseRepo.save(license);
+
+        try {
+            Map<String, Object> userInfo = getUserInfoForAudit();
+            Long currentUserId = (Long) userInfo.get("userId");
+
+            AuditLogRequestDTO logRequest = AuditLogRequestDTO.builder()
+                    .userId(currentUserId)
+                    .entityType("LICENSE")
+                    .entityId("2")
+                    .action("UPDATE")
+                    .details("UPDATED LICENSE")
+                    .build();
+            auditLogService.createLog(logRequest);
+
+        } catch (Exception e) {
+            System.err.println("Audit logging failed for license update: " + e.getMessage());
+        }
+
         return LicenseUtility.toDto(saved);
     }
 
@@ -58,17 +105,30 @@ public class LicenseServiceImpl implements LicenseService {
     public String deleteLicense(String licenseKey) {
         License license = licenseRepo.findById(licenseKey)
                 .orElseThrow(() -> new ResourceNotFoundException("License not found: " + licenseKey));
-
         licenseRepo.delete(license);
+        try {
+            Map<String, Object> userInfo = getUserInfoForAudit();
+            Long currentUserId = (Long) userInfo.get("userId");
+            AuditLogRequestDTO logRequest = AuditLogRequestDTO.builder()
+                    .userId(currentUserId)
+                    .entityType("LICENSE")
+                    .entityId("2")
+                    .action("DELETE")
+                    .details("DELETED LICENSE")
+                    .build();
+            auditLogService.createLog(logRequest);
+
+        } catch (Exception e) {
+            System.err.println("Audit logging failed for license deletion: " + e.getMessage());
+        }
+
         return "License deleted successfully";
     }
 
     @Override
     public List<LicenseResponseDTO> searchLicenses(String vendorName, String softwareName) {
         List<License> licenses;
-
         if (vendorName != null && !vendorName.isEmpty()) {
-            // Find the vendor by name first
             Vendor vendor = vendorRepository.findByVendorNameIgnoreCase(vendorName)
                     .orElseThrow(() -> new ResourceNotFoundException("Vendor not found: " + vendorName));
             licenses = licenseRepo.findByVendor(vendor);
@@ -77,7 +137,6 @@ public class LicenseServiceImpl implements LicenseService {
         } else {
             licenses = licenseRepo.findAll();
         }
-
         return licenses.stream().map(LicenseUtility::toDto).collect(Collectors.toList());
     }
 

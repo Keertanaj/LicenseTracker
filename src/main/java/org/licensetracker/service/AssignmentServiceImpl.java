@@ -61,20 +61,12 @@ public class AssignmentServiceImpl implements AssignmentService {
             );
         }
         Assignment savedAssignment = assignmentRepository.save(assignment);
-
-        // --- New, Corrected Logic to create Installation entry ---
         String softwareName = savedAssignment.getLicense().getSoftwareName();
-        
-        // Find the software in the master software table. Throw an error if it doesn't exist.
         Software software = softwareRepository.findBySoftwareName(softwareName)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Cannot create installation. Software named '" + softwareName + "' does not exist in the master software list."
                 ));
-
-        // If software is found, create the installation record.
         installationService.createInstallation(savedAssignment.getDevice(), software);
-        // --- End of New Logic ---
-
         return AssignmentUtility.toDto(savedAssignment);
     }
 
