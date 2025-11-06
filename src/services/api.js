@@ -61,4 +61,8 @@ export const alertService = {
     }
 };
 
+export const aiService = {
+    getSummary: (query) => api.post('/ai/query', { query })
+};
+
 export default api;

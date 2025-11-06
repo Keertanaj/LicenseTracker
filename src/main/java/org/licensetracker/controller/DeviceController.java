@@ -22,21 +22,18 @@ public class DeviceController {
     private DeviceService deviceService;
 
     @PostMapping
-
     public ResponseEntity<DeviceResponseDTO> addDevice(@RequestBody DeviceRequestDTO request) {
         DeviceResponseDTO response = deviceService.addDevice(request);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
-
     public ResponseEntity<List<DeviceResponseDTO>> listDevices() {
         List<DeviceResponseDTO> devices = deviceService.listDevices();
         return ResponseEntity.ok(devices);
     }
 
     @PutMapping("/{deviceId}")
-
     public ResponseEntity<DeviceResponseDTO> updateDevice(
             @PathVariable String deviceId,
             @RequestBody DeviceRequestDTO request) {

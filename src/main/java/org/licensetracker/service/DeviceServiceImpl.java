@@ -50,7 +50,7 @@ public class DeviceServiceImpl implements DeviceService {
                     .build();
             auditLogService.createLog(logRequest);
 
-        } catch (Exception e) { // Catch SecurityException, JsonProcessingException, and errors from AuditLogService
+        } catch (Exception e) {
             System.err.println("Audit logging failed for device creation: " + e.getMessage());
         }
         return DeviceUtility.toDto(saved);

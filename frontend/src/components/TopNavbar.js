@@ -10,7 +10,9 @@ const navItems = [
     { path: "/reports", label: "Reports"},
     { path: "/users", label: "User Management" },
     { path: "/auditlogs", label: "Audit Logs"},
-    { path: "/software", label: "Software"}
+    { path: "/software", label: "Software"},
+    { path: "/vendors", label: "Vendors"},
+    { path: "/ai", label: "AI Chatbot"}
 ];
 
 const TopNavbar = () => {
