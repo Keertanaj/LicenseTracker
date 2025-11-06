@@ -2,16 +2,17 @@ package org.licensetracker.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.licensetracker.dto.AuditLogRequestDTO;
-import org.licensetracker.dto.DeviceRequestDTO;
-import org.licensetracker.dto.DeviceResponseDTO;
+import org.licensetracker.dto.*;
 import org.licensetracker.entity.Device;
 import org.licensetracker.entity.DeviceStatus;
-import org.licensetracker.exception.BadRequestException;
-import org.licensetracker.exception.DuplicateResourceException;
-import org.licensetracker.exception.ResourceNotFoundException;
+import org.licensetracker.entity.Installation;
+import org.licensetracker.entity.Software;
+import org.licensetracker.exception.*;
 import org.licensetracker.repository.DeviceRepo;
+import org.licensetracker.repository.InstallationRepository;
+import org.licensetracker.repository.SoftwareRepository;
 import org.licensetracker.utility.DeviceUtility;
+import org.licensetracker.utility.SoftwareUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,12 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Autowired
     private AuditLogService auditLogService;
+
+    @Autowired
+    private InstallationRepository installationRepo;
+
+    @Autowired
+    private SoftwareRepository softwareRepo;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -153,5 +160,36 @@ public class DeviceServiceImpl implements DeviceService {
     public Device getDeviceById(String deviceId) {
         return deviceRepo.findById(deviceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Device not found with ID: " + deviceId));
+    }
+
+    @Override
+    public SoftwareResponseDTO getSoftwareDetailsByDeviceId(String deviceId) {
+        Device device = getDeviceById(deviceId);
+        Installation installation = installationRepo.findByDevice_DeviceId(deviceId);
+        if (installation == null) {
+            throw new SoftwareNotInstalledException("No software installation found for device: " + deviceId);
+        }
+        Software software = installation.getSoftware();
+        boolean outdated = !software.getCurrentVersion().equals(software.getLatestVersion());
+        SoftwareResponseDTO response = SoftwareUtility.toDto(software);
+        return response;
+    }
+
+    @Override
+    public void renewSoftwareVersion(String deviceId) {
+        Installation installation = installationRepo.findByDevice_DeviceId(deviceId);
+        if (installation == null) {
+            throw new SoftwareNotInstalledException("No software installation found for device: " + deviceId);
+        }
+
+        Software software = installation.getSoftware();
+
+        if (!software.getCurrentVersion().equals(software.getLatestVersion())) {
+            software.setCurrentVersion(software.getLatestVersion());
+            softwareRepo.save(software);
+
+        } else {
+            throw new SoftwareAlreadyCurrentException("Software version is already current.");
+        }
     }
 }

@@ -2,6 +2,8 @@ package org.licensetracker.service;
 
 import org.licensetracker.dto.DeviceRequestDTO;
 import org.licensetracker.dto.DeviceResponseDTO;
+import org.licensetracker.dto.SoftwareRequestDTO;
+import org.licensetracker.dto.SoftwareResponseDTO;
 import org.licensetracker.entity.Device;
 
 import java.util.List;
@@ -15,4 +17,6 @@ public interface DeviceService {
     List<String> getAllLocations();
     List<String> getAllIpAddresses();
     public Device getDeviceById(String deviceId);
+    SoftwareResponseDTO getSoftwareDetailsByDeviceId(String deviceId);
+    void renewSoftwareVersion(String deviceId);
 }

@@ -3,6 +3,7 @@ package org.licensetracker.controller;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.licensetracker.dto.DeviceRequestDTO;
 import org.licensetracker.dto.DeviceResponseDTO;
+import org.licensetracker.dto.SoftwareResponseDTO;
 import org.licensetracker.entity.Device;
 import org.licensetracker.service.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,5 +77,19 @@ public class DeviceController {
     public ResponseEntity<Device> getDeviceById(@PathVariable String deviceId) {
         Device device = deviceService.getDeviceById(deviceId);
         return ResponseEntity.ok().body(device);
+    }
+
+    @GetMapping("/{deviceId}/software-status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN')")
+    public ResponseEntity<SoftwareResponseDTO> getSoftwareStatus(@PathVariable String deviceId) {
+        return ResponseEntity.ok(deviceService.getSoftwareDetailsByDeviceId(deviceId));
+    }
+
+    // PUT: Renew/Update Software Version (Use Case 9)
+    @PutMapping("/{deviceId}/renew-version")
+    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ENGINEER', 'NETWORK_ADMIN')")
+    public ResponseEntity<Void> renewSoftware(@PathVariable String deviceId) {
+        deviceService.renewSoftwareVersion(deviceId);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -12,4 +12,5 @@ public interface InstallationRepository extends JpaRepository<Installation, Inte
     // New method to count distinct devices for a given software name
     @Query("SELECT COUNT(DISTINCT i.device) FROM Installation i WHERE i.software.softwareName = :softwareName")
     long countDistinctDevicesBySoftwareName(@Param("softwareName") String softwareName);
+    Installation findByDevice_DeviceId(String deviceId);
 }
