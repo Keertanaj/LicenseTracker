@@ -6,9 +6,12 @@ import org.licensetracker.dto.ChatRequestDto;
 import org.licensetracker.dto.ChatResponseDto;
 import org.licensetracker.entity.User;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/ai")
@@ -19,19 +22,13 @@ public class ChatController {
     private final AiChatAssistant chatAssistant;
 
     @PostMapping("/message")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_LEAD', 'PRODUCT_OWNER'))")
     public ResponseEntity<ChatResponseDto> sendMessage(@RequestBody ChatRequestDto request) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
-                return ResponseEntity.status(401).body(
-                        new ChatResponseDto("Please log in to use the chat assistant.", null)
-                );
-            }
+            String chatId = UUID.randomUUID().toString();
 
-            User currentUser = (User) authentication.getPrincipal();
-            String chatId = "user-" + currentUser.getUserId();
-
-            log.info("Processing chat message for user: {}, chatId: {}", currentUser.getEmail(), chatId);
+            log.info("Processing chat message for user: {}, chatId: {}", authentication.getName(), chatId);
 
             String response = chatAssistant.chat(chatId, request.getMessage());
 
@@ -46,7 +43,7 @@ public class ChatController {
             );
         }
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_LEAD', 'PRODUCT_OWNER'))")
     @DeleteMapping("/clear/{chatId}")
     public ResponseEntity<Void> clearChatHistory(@PathVariable String chatId) {
         try {

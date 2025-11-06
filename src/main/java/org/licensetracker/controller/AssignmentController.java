@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/assignments")
 @SecurityRequirement(name = "Bearer Authentication")
-@CrossOrigin(origins = "http://localhost:3000")
+
 public class AssignmentController {
 
     @Autowired

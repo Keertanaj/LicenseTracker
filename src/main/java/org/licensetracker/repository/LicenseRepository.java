@@ -13,7 +13,7 @@ import java.util.List;
 public interface LicenseRepository extends JpaRepository<License, String> {
     List<License> findBySoftwareNameContainingIgnoreCase(String softwareName);
     List<License> findByVendor(Vendor vendor);
-
+    List<License> findByVendorVendorNameIgnoreCaseAndSoftwareNameContainingIgnoreCase(String vendorName, String softwareName);
     @Query(value = "SELECT * FROM license WHERE valid_to <= DATE_ADD(CURRENT_DATE(), INTERVAL :days DAY)", nativeQuery = true)
     List<License> findExpiringLicenses(@Param("days") int days);
 

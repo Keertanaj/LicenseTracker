@@ -1,8 +1,11 @@
 package org.licensetracker.service;
 
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
+import org.licensetracker.dto.SignupRequest;
 import org.licensetracker.entity.Role;
 import org.licensetracker.entity.User;
+import org.licensetracker.exception.EmailAlreadyExistsException;
 import org.licensetracker.jwt.JwtUtils;
 import org.licensetracker.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,15 +23,15 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtils jwtUtils;
 
     @Override
-    public User registerUser(String username, String email, String password, String mobile) {
-        if (userRepository.existsByEmail(email)) {
-            throw new RuntimeException("Email already taken!");
+    public User registerUser(SignupRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new EmailAlreadyExistsException("Email already taken!");
         }
 
         User user = new User();
-        user.setName(username); // Correctly set the name
-        user.setEmail(email);
-        user.setPasswordHash(passwordEncoder.encode(password));
+        user.setName(request.getUsername()); // Correctly set the name
+        user.setEmail(request.getEmail());
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.ROLE_USER); // Default role
 
         return userRepository.save(user);

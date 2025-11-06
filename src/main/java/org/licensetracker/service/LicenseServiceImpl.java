@@ -1,15 +1,14 @@
 package org.licensetracker.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.licensetracker.dto.AuditLogRequestDTO; // 👈 Import Audit DTO
-import org.licensetracker.dto.LicenseAlertDTO;
-import org.licensetracker.dto.LicenseRequestDTO;
-import org.licensetracker.dto.LicenseResponseDTO;
+import org.licensetracker.dto.*;
+import org.licensetracker.entity.Device;
 import org.licensetracker.entity.License;
 import org.licensetracker.entity.Vendor;
 import org.licensetracker.exception.DuplicateResourceException;
 import org.licensetracker.exception.ResourceNotFoundException;
 import org.licensetracker.repository.LicenseRepository;
 import org.licensetracker.repository.VendorRepository;
+import org.licensetracker.utility.DeviceUtility;
 import org.licensetracker.utility.LicenseUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -128,7 +127,10 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public List<LicenseResponseDTO> searchLicenses(String vendorName, String softwareName) {
         List<License> licenses;
-        if (vendorName != null && !vendorName.isEmpty()) {
+
+        if (vendorName != null && !vendorName.isEmpty() && softwareName != null && !softwareName.isEmpty()) {
+            licenses = licenseRepo.findByVendorVendorNameIgnoreCaseAndSoftwareNameContainingIgnoreCase(vendorName, softwareName);
+        } else if (vendorName != null && !vendorName.isEmpty()) {
             Vendor vendor = vendorRepository.findByVendorNameIgnoreCase(vendorName)
                     .orElseThrow(() -> new ResourceNotFoundException("Vendor not found: " + vendorName));
             licenses = licenseRepo.findByVendor(vendor);

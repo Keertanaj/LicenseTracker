@@ -12,34 +12,33 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/vendors") // Note the plural resource path
+@RequestMapping("/vendors")
 @SecurityRequirement(name = "Bearer Authentication")
-@CrossOrigin(origins = "http://localhost:3000")
 public class VendorController {
 
     @Autowired
     private VendorService vendorService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_LEAD', 'PROCUREMENT_OFFICER')")
     public ResponseEntity<VendorResponseDTO> addVendor(@RequestBody VendorRequestDTO request) {
         return ResponseEntity.ok(vendorService.addVendor(request));
     }
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()") // Or hasAnyRole('ADMIN', 'USER', 'AUDITOR')
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SECURITY_HEAD', 'COMPLIANCE_LEAD', 'COMPLIANCE_OFFICER', 'PROCUREMENT_LEAD', 'PROCUREMENT_OFFICER', 'OPERATIONS_MANAGER', 'IT_AUDITOR', 'NETWORK_ADMIN', 'NETWORK_ENGINEER')")
     public ResponseEntity<List<VendorResponseDTO>> getAllVendors() {
         return ResponseEntity.ok(vendorService.getAllVendors());
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_LEAD', 'PROCUREMENT_OFFICER')")
     public ResponseEntity<VendorResponseDTO> updateVendor(@PathVariable Long id, @RequestBody VendorRequestDTO request) {
         return ResponseEntity.ok(vendorService.updateVendor(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_LEAD', 'PROCUREMENT_OFFICER')")
     public ResponseEntity<Void> deleteVendor(@PathVariable Long id) {
         vendorService.deleteVendor(id);
         return ResponseEntity.noContent().build();

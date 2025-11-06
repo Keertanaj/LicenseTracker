@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Set;
+
 @Builder
 @Entity
 @Table(name = "device")
@@ -27,4 +29,10 @@ public class Device {
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "device", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Set<Assignment> assignments;
+
+    @OneToMany(mappedBy = "device", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Set<Installation> softwareInstallations;
 }

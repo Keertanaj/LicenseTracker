@@ -49,7 +49,7 @@ public class ComplianceTools {
         try {
             // NOTE: We call getCurrentUser() here, but its value is not used for data fetching (since licenses are global),
             // but it ENSURES the user is logged in before running the query.
-            getCurrentUser();
+            //getCurrentUser();
             return licenseService.getExpiringLicenses(days);
         } catch (Exception e) {
             log.error("AI Tool Error fetching expiring licenses.", e);
@@ -63,7 +63,7 @@ public class ComplianceTools {
             @P("The name of the software. Can be a partial name.") String softwareName) {
         log.info("AI Tool: Executing searchLicenses - Vendor: {}, Software: {}", vendorName, softwareName);
         try {
-            getCurrentUser();
+            //getCurrentUser();
             List<LicenseResponseDTO> licenses = licenseService.searchLicenses(vendorName, softwareName);
             return licenses.stream()
                     .map(this::convertToLicenseAlertDTO)
@@ -89,7 +89,7 @@ public class ComplianceTools {
     public List<DeviceResponseDTO> listAllDevices() {
         log.info("AI Tool: Executing listAllDevices.");
         try {
-            getCurrentUser();
+//            getCurrentUser();
             return deviceService.listDevices();
         } catch (Exception e) {
             log.error("AI Tool Error fetching device list.", e);
@@ -103,7 +103,7 @@ public class ComplianceTools {
             @P("The location of the device to search for (e.g., 'BLR', 'NYC').") String locationQuery) {
         log.info("AI Tool: Executing searchDevices - IP: {}, Location: {}", ipAddressQuery, locationQuery);
         try {
-            getCurrentUser();
+            //getCurrentUser();
             return deviceService.searchDevices(ipAddressQuery, locationQuery);
         } catch (Exception e) {
             log.error("AI Tool Error searching devices.", e);
@@ -115,11 +115,24 @@ public class ComplianceTools {
     public List<String> getAllDeviceLocations() {
         log.info("AI Tool: Executing getAllDeviceLocations.");
         try {
-            getCurrentUser();
+            //getCurrentUser();
             return deviceService.getAllLocations();
         } catch (Exception e) {
             log.error("AI Tool Error fetching locations.", e);
             return Collections.emptyList();
         }
     }
+
+    @Tool("Retrieves a complete list of all available licenses in the system.")
+    public List<LicenseAlertDTO> getAllLicenses() {
+        log.info("AI Tool: Executing getAllLicenses.");
+        try {
+            return searchLicenses("", "");
+        } catch (Exception e) {
+            log.error("AI Tool Error fetching all licenses.", e);
+            return Collections.emptyList();
+        }
+    }
+
+
 }

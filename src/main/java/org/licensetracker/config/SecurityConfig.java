@@ -18,6 +18,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableMethodSecurity
@@ -49,29 +54,62 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // Allow specific origins
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+
+        // Allow specific methods
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+
+        // Allow specific headers
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "X-Requested-With",
+                "Accept",
+                "Origin",
+                "Access-Control-Request-Method",
+                "Access-Control-Request-Headers"
+        ));
+
+
+        configuration.setExposedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Disposition"
+        ));
+
+
+        configuration.setAllowCredentials(true);
+
+
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(org.springframework.security.config.annotation.web.builders.HttpSecurity http) throws Exception {
 
         http.csrf(csrf -> csrf.disable())
+                .cors(cors->cors.configurationSource(corsConfigurationSource()))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/devices/**").hasAnyRole("ADMIN")
                         .requestMatchers("/licenses/**").hasAnyRole("ADMIN")
                         .requestMatchers("/assignments/**").hasAnyRole("ADMIN")
                         .requestMatchers("/alerts/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/dashboard/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/software/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/dashboard/**").hasAnyRole("ADMIN")
                         .requestMatchers("/vendors/**").hasAnyRole("ADMIN")
                         .requestMatchers("/reports/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/users/**").hasAnyRole("ADMIN")
                         .requestMatchers("/roles/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/auditlogs/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/software/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/ai/**").hasAnyRole("ADMIN")
                         .anyRequest().authenticated()
                 );
 

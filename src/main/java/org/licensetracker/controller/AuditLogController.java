@@ -15,14 +15,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/auditlogs")
 @SecurityRequirement(name = "Bearer Authentication")
-@CrossOrigin(origins = "http://localhost:3000")
+
 public class AuditLogController {
 
     @Autowired
     private AuditLogService auditLogService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('AUDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AUDITOR')")
     public ResponseEntity<List<AuditLogResponseDTO>> getAuditLogs(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,

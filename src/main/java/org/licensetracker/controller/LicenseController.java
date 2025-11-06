@@ -13,7 +13,7 @@ import java.util.List;
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
 @RequestMapping("/licenses")
-@CrossOrigin(origins = "http://localhost:3000")
+
 public class LicenseController {
 
     @Autowired

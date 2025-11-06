@@ -13,11 +13,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/alerts")
 @SecurityRequirement(name = "Bearer Authentication")
-@CrossOrigin(origins = "http://localhost:3000")
+
 public class AlertController {
     @Autowired
     private LicenseService licenseService;
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<LicenseAlertDTO>> getExpiringAlerts(@RequestParam(defaultValue = "30") int days) {
         List<LicenseAlertDTO> alerts = licenseService.getExpiringLicenses(days);
         return ResponseEntity.ok(alerts);
