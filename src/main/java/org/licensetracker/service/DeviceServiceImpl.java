@@ -1,7 +1,5 @@
 package org.licensetracker.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.licensetracker.dto.*;
 import org.licensetracker.entity.Device;
 import org.licensetracker.entity.DeviceStatus;
@@ -34,8 +32,6 @@ public class DeviceServiceImpl implements DeviceService {
     @Autowired
     private SoftwareRepository softwareRepo;
 
-    @Autowired
-    private ObjectMapper objectMapper;
     private Map<String, Object> getUserInfoForAudit() {
         return auditLogService.getCurrentUserInfo();
     }

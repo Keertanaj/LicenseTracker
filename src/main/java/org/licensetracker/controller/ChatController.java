@@ -1,10 +1,10 @@
-package org.licensetracker.ai;
+package org.licensetracker.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.licensetracker.ai.AiChatAssistant;
 import org.licensetracker.dto.ChatRequestDto;
 import org.licensetracker.dto.ChatResponseDto;
-import org.licensetracker.entity.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -22,7 +22,7 @@ public class ChatController {
     private final AiChatAssistant chatAssistant;
 
     @PostMapping("/message")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_LEAD', 'PRODUCT_OWNER'))")
+    @PreAuthorize("hasAnyRole('ADMIN', 'COMPLIANCE_OFFICER', 'IT_AUDITOR','COMPLIANCE_LEAD', 'PROCUREMENT_LEAD', 'PRODUCT_OWNER'))")
     public ResponseEntity<ChatResponseDto> sendMessage(@RequestBody ChatRequestDto request) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -43,7 +43,7 @@ public class ChatController {
             );
         }
     }
-    @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_LEAD', 'PRODUCT_OWNER'))")
+    @PreAuthorize("hasAnyRole('ADMIN','COMPLIANCE_OFFICER','IT_AUDITOR', 'PROCUREMENT_LEAD', 'PRODUCT_OWNER'))")
     @DeleteMapping("/clear/{chatId}")
     public ResponseEntity<Void> clearChatHistory(@PathVariable String chatId) {
         try {

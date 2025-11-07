@@ -23,23 +23,21 @@ public class DeviceController {
     private DeviceService deviceService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN', 'OPERATIONS_MANAGER')")
     public ResponseEntity<DeviceResponseDTO> addDevice(@RequestBody DeviceRequestDTO request) {
         DeviceResponseDTO response = deviceService.addDevice(request);
         return ResponseEntity.ok(response);
     }
-    private static final String READ_DEVICE_ROLES =
-            "hasAnyRole('ADMIN', 'SECURITY_HEAD', 'PRODUCT_OWNER', 'COMPLIANCE_LEAD', 'COMPLIANCE_OFFICER', 'PROCUREMENT_LEAD', 'PROCUREMENT_OFFICER', 'OPERATIONS_MANAGER', 'IT_AUDITOR', 'NETWORK_ADMIN', 'NETWORK_ENGINEER')";
 
     @GetMapping
-    @PreAuthorize(READ_DEVICE_ROLES)
+    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN', 'OPERATIONS_MANAGER', 'NETWORK_ENGINEER')")
     public ResponseEntity<List<DeviceResponseDTO>> listDevices() {
         List<DeviceResponseDTO> devices = deviceService.listDevices();
         return ResponseEntity.ok(devices);
     }
 
     @PutMapping("/{deviceId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN' , 'OPERATIONS_MANAGER')")
     public ResponseEntity<DeviceResponseDTO> updateDevice(
             @PathVariable String deviceId,
             @RequestBody DeviceRequestDTO request) {
@@ -48,46 +46,45 @@ public class DeviceController {
     }
 
     @DeleteMapping("/{deviceId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'OPERATIONS_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN', OPERATIONS_MANAGER')")
     public ResponseEntity<String> deleteDevice(@PathVariable String deviceId) {
         String message = deviceService.deleteDevice(deviceId);
         return ResponseEntity.ok(message);
     }
 
     @GetMapping("/search")
-    @PreAuthorize(READ_DEVICE_ROLES)
+    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN', 'OPERATIONS_MANAGER')")
     public ResponseEntity<List<DeviceResponseDTO>> searchDevices(@RequestParam(required = false) String ipAddress,  @RequestParam(required = false) String location) {
         List<DeviceResponseDTO> devices = deviceService.searchDevices(ipAddress, location);
         return ResponseEntity.ok(devices);
     }
     @GetMapping("/locations")
-    @PreAuthorize(READ_DEVICE_ROLES)
+    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN', 'OPERATIONS_MANAGER', 'NETWORK_ENGINEER')")
     public ResponseEntity<List<String>> getAllLocations() {
         List<String> locations = deviceService.getAllLocations();
         return ResponseEntity.ok(locations);
     }
     @GetMapping("/ipaddresses")
-    @PreAuthorize(READ_DEVICE_ROLES)
+    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN', 'OPERATIONS_MANAGER', 'NETWORK_ENGINEER')")
     public ResponseEntity<List<String>> getAllIpAddresses() {
         List<String> ipaddresses = deviceService.getAllIpAddresses();
         return ResponseEntity.ok(ipaddresses);
     }
     @GetMapping("/{deviceId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN','OPERATIONS_MANAGER')")
     public ResponseEntity<Device> getDeviceById(@PathVariable String deviceId) {
         Device device = deviceService.getDeviceById(deviceId);
         return ResponseEntity.ok().body(device);
     }
 
     @GetMapping("/{deviceId}/software-status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN', 'OPERATIONS_MANAGER')")
     public ResponseEntity<SoftwareResponseDTO> getSoftwareStatus(@PathVariable String deviceId) {
         return ResponseEntity.ok(deviceService.getSoftwareDetailsByDeviceId(deviceId));
     }
 
-    // PUT: Renew/Update Software Version (Use Case 9)
     @PutMapping("/{deviceId}/renew-version")
-    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ENGINEER', 'NETWORK_ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','NETWORK_ADMIN', 'OPERATIONS_MANAGER')")
     public ResponseEntity<Void> renewSoftware(@PathVariable String deviceId) {
         deviceService.renewSoftwareVersion(deviceId);
         return ResponseEntity.noContent().build();

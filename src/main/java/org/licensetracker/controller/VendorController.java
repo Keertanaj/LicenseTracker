@@ -26,19 +26,19 @@ public class VendorController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SECURITY_HEAD', 'COMPLIANCE_LEAD', 'COMPLIANCE_OFFICER', 'PROCUREMENT_LEAD', 'PROCUREMENT_OFFICER', 'OPERATIONS_MANAGER', 'IT_AUDITOR', 'NETWORK_ADMIN', 'NETWORK_ENGINEER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_OFFICER', 'PROCUREMENT_LEAD')")
     public ResponseEntity<List<VendorResponseDTO>> getAllVendors() {
         return ResponseEntity.ok(vendorService.getAllVendors());
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_LEAD', 'PROCUREMENT_OFFICER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_OFFICER', 'PROCUREMENT_LEAD')")
     public ResponseEntity<VendorResponseDTO> updateVendor(@PathVariable Long id, @RequestBody VendorRequestDTO request) {
         return ResponseEntity.ok(vendorService.updateVendor(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PROCUREMENT_LEAD', 'PROCUREMENT_OFFICER')")
+    @PreAuthorize("hasAnyRole('ADMIN','PROCUREMENT_OFFICER', 'PROCUREMENT_LEAD')")
     public ResponseEntity<Void> deleteVendor(@PathVariable Long id) {
         vendorService.deleteVendor(id);
         return ResponseEntity.noContent().build();

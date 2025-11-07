@@ -73,7 +73,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     public List<AssignmentResponseDTO> getAssignmentsByDeviceId(String deviceId) {
         return assignmentRepository.findByDevice_DeviceId(deviceId).stream()
                 .map(AssignmentUtility::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

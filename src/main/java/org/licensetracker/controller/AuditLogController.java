@@ -22,7 +22,7 @@ public class AuditLogController {
     private AuditLogService auditLogService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'AUDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'IT_AUDITOR', 'SECURITY_HEAD')")
     public ResponseEntity<List<AuditLogResponseDTO>> getAuditLogs(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,

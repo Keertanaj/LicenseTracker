@@ -20,23 +20,20 @@ public class DashboardController {
     @Autowired
     private DashboardService dashboardService;
 
-    private static final String READ_DEVICE_ROLES =
-            "hasAnyRole('ADMIN', 'SECURITY_HEAD', 'PRODUCT_OWNER', 'COMPLIANCE_LEAD', 'COMPLIANCE_OFFICER', 'PROCUREMENT_LEAD', 'PROCUREMENT_OFFICER', 'OPERATIONS_MANAGER', 'IT_AUDITOR', 'NETWORK_ADMIN', 'NETWORK_ENGINEER')";
-
     @GetMapping("/metrics")
-    @PreAuthorize(READ_DEVICE_ROLES)
+    @PreAuthorize("hasAnyRole('ADMIN', 'COMPLIANCE_OFFICER', 'COMPLIANCE_LEAD','PRODUCT_OWNER')")
     public ResponseEntity<DashboardMetricsDTO> getDashboardMetrics() {
         return ResponseEntity.ok(dashboardService.getDashboardMetrics());
     }
 
     @GetMapping("/expiringlicenses")
-    @PreAuthorize(READ_DEVICE_ROLES)
+    @PreAuthorize("hasAnyRole('ADMIN', 'COMPLIANCE_OFFICER', 'COMPLIANCE_LEAD', 'PRODUCT_OWNER')")
     public ResponseEntity<List<LicenseAlertDTO>> getExpiringLicenses(@RequestParam(defaultValue = "30") int days) {
         return ResponseEntity.ok(dashboardService.getExpiringLicenses(days));
     }
 
     @GetMapping("/devicesatrisk")
-    @PreAuthorize(READ_DEVICE_ROLES)
+    @PreAuthorize("hasAnyRole('ADMIN', 'COMPLIANCE_OFFICER', 'COMPLIANCE_LEAD', 'PRODUCT_OWNER')")
     public ResponseEntity<Long> getDevicesAtRisk(@RequestParam(defaultValue = "30") int days) {
         return ResponseEntity.ok(dashboardService.getDevicesAtRisk(days));
     }

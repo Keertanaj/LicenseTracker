@@ -104,12 +104,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/licenses/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/assignments/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/alerts/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/vendors/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/reports/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/roles/**").hasAnyRole("ADMIN")
                         .anyRequest().authenticated()
                 );
 

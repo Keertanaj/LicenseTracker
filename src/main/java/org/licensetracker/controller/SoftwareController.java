@@ -20,25 +20,25 @@ public class SoftwareController {
     @Autowired
     private SoftwareService softwareService;
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN', 'NETWORK_ENGINEER', 'PROCUREMENT_OFFICER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN', 'PROCUREMENT_OFFICER')")
     public ResponseEntity<SoftwareResponseDTO> addSoftware(@RequestBody SoftwareRequestDTO request) {
         return ResponseEntity.ok(softwareService.addSoftware(request));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'SECURITY_HEAD', 'PRODUCT_OWNER', 'COMPLIANCE_LEAD', 'COMPLIANCE_OFFICER', 'PROCUREMENT_LEAD', 'PROCUREMENT_OFFICER', 'OPERATIONS_MANAGER', 'IT_AUDITOR', 'NETWORK_ADMIN', 'NETWORK_ENGINEER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN', 'PROCUREMENT_OFFICER', 'NETWORK_ENGINEER')")
     public ResponseEntity<List<SoftwareResponseDTO>> getAllSoftware() {
         return ResponseEntity.ok(softwareService.getAllSoftware());
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN', 'NETWORK_ENGINEER', 'PROCUREMENT_OFFICER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN', 'OPERATIONS_MANAGER', 'NETWORK_ENGINEER')")
     public ResponseEntity<SoftwareResponseDTO> updateSoftware(@PathVariable Integer id, @RequestBody SoftwareRequestDTO request) {
         return ResponseEntity.ok(softwareService.updateSoftware(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN', 'NETWORK_ENGINEER', 'PROCUREMENT_OFFICER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'NETWORK_ADMIN','OPERATIONS_MANAGER')")
     public ResponseEntity<Void> deleteSoftware(@PathVariable Integer id) {
         softwareService.deleteSoftware(id);
         return ResponseEntity.noContent().build();

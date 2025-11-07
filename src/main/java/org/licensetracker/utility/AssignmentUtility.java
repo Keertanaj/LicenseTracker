@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public class AssignmentUtility {
+
     public static Assignment toEntity(AssignmentRequestDTO dto, DeviceRepo deviceRepository, LicenseRepository licenseRepository) {
         Assignment a = new Assignment();
 
